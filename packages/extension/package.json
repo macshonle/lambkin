@@ -1,0 +1,57 @@
+{
+  "name": "lambkin-vscode",
+  "displayName": "Lambkin - Lambda Calculus",
+  "description": "Language support for Lambda Calculus (.lambkin files)",
+  "version": "0.1.0",
+  "publisher": "lambkin",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:lambkin"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "lambkin",
+        "aliases": [
+          "Lambda Calculus",
+          "lambkin"
+        ],
+        "extensions": [
+          ".lambkin",
+          ".lam"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "lambkin",
+        "scopeName": "source.lambkin",
+        "path": "./syntaxes/lambkin.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "clean": "rm -rf dist",
+    "watch": "node build.mjs --watch",
+    "package": "pnpm run build && vsce package --no-dependencies",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^2.22.0",
+    "esbuild": "^0.19.10",
+    "typescript": "^5.3.3"
+  }
+}
