@@ -1,0 +1,67 @@
+-- 1. BOOLEAN LOGIC --
+-- Church Booleans encode a choice between two arguments.
+let true  := \x. \y. x
+let false := \x. \y. y
+
+let if    := \b. \t. \f. b t f
+
+let and   := \p. \q. p q p
+let or    := \p. \q. p p q
+let not   := \p. p false true
+
+-- 2. PAIRS --
+-- A pair wraps two values in a function; extracting them requires a boolean.
+let cons := \x. \y. \f. f x y
+let car  := \p. p true
+let cdr  := \p. p false
+
+-- 3. NUMERALS (Church Numerals) --
+-- A number N is a higher-order function that applies function f to argument x, N times.
+let 0 := \f. \x. x
+let 1 := \f. \x. f x
+let 2 := \f. \x. f (f x)
+
+let succ := \n. \f. \x. f (n f x)
+
+-- 4. ARITHMETIC --
+let + := \m. \n. \f. \x. m f (n f x)
+let * := \m. \n. \f. \x. m (n f) x
+let pow := \b. \e. e b
+
+-- 'is_zero' checks if the number applies its function at least once.
+-- We pass a function that always returns 'false' for the first application.
+-- If 0 is passed, the function is never called, so we return the base argument 'true'.
+let is_zero := \n. n (\x. false) true
+
+-- 5. PREDECESSOR --
+-- We use a pair (a, b) and a step function that maps (a, b) -> (b, b+1).
+-- Running this N times on (0, 0) gives (N-1, N). We take the first element (car).
+let zero_pair := cons 0 0
+let succ_pair := \p. cons (cdr p) (succ (cdr p))
+
+let pred := \n. car (n succ_pair zero_pair)
+
+-- 6. RECURSION (Combinators) --
+-- The Y combinator allows anonymous functions to be recursive by passing 
+-- the function to itself. (Standard formulation for call-by-name).
+let Y := \f. (\x. f (x x)) (\x. f (x x))
+
+-- 7. CANONICAL EXAMPLES --
+
+-- Factorial: f(n) = if (n==0) 1 else n * f(n-1)
+-- Note: 'is_zero' returns a boolean, which drives 'if'.
+let factorial_step := \f. \n. if (is_zero n) 1 (* n (f (pred n)))
+let factorial := Y factorial_step
+
+-- Fibonacci: f(n) = if (n<2) n else f(n-1) + f(n-2)
+-- We strictly need a 'less_than' predicate, but for simplicity here
+-- we will use (is_zero n) or (is_zero (pred n)).
+let fib_step := \f. \n. 
+  if (is_zero n) 0 
+    (if (is_zero (pred n)) 1 
+      (+ (f (pred n)) (f (pred (pred n)))))
+
+let fibonacci := Y fib_step
+
+-- Infinite List (Stream) of 1s:
+let ones := Y (\self. cons 1 self)
